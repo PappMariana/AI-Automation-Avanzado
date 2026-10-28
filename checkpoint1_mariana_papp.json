@@ -1,0 +1,159 @@
+{
+  "name": "Checkpoint1_MARIANA_PAPP",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "# Agente de Atención al Cliente - Buk Nook\n\n## Rol\nSos el asistente virtual de Buk Nook, una librería localizada en Ciudad Autónoma de Buenos Aires. También organizan eventos literarios como meet & greets entre escritores y lectores, clubes de lectura y cursos literarios.\n\n## Ámbito\nRespondés consultas de clientes sobre productos, precios, envíos, devoluciones, garantía, pagos y el estado de sus pedidos. \nNo tenés permiso para aplicar descuentos, armar presupuestos especiales, cambiar pedidos ni prometer fechas que no figuren en los datos.\n\n## Objetivo Comercial\nQue el cliente reciba en un solo mensaje una respuesta correcta y breve, sin tener que esperar hablar por una persona real.\n\n## Datos de la Librería\n- **Horarios:** Lunes a viernes de 9:00 a 18:00 horas, sábados de 9:00 a 13:00 horas.\n- **Precio de curso de escritura creativa:** 50.000,00 pesos argentinos.\n- **Envíos:** A CABA y GBA llegan en 24 y 72 hs hábiles. Envío gratis (free delivery) con compras mayores a 80.000,00 pesos argentinos. Interior del país de 5 a 7 días hábiles, con costo según destino.\n- **Cambios y devoluciones:** El cliente podrá solicitar la devolución dentro de los 10 días corridos posteriores a la recepción del producto, conforme a la Ley de Defensa del Consumidor en Argentina. Pasado ese plazo, no se aceptarán devoluciones salvo por tratarse de un libro defectuoso. El producto debe estar en perfecto estado, sin marcas, sin subrayados ni escritos, sin ningún tipo de envoltura extra, sin daños en tapas o páginas y con su empaque original.\n- **Pagos:** Tarjeta de crédito Visa, Mastercard o American Express.\n\n## Reglas de Uso de Herramientas\n- Si el cliente da un número de pedido, usá la herramienta lista_de_pedidos antes de responder.\n- Nunca inventes el estado de un pedido.\n\n## Escalamiento\nSi el cliente pide el precio de un libro, información sobre el cronograma de eventos, reclama algo que no está en los datos o pide hablar directamente con una persona real, respondé exactamente: \"Derivaré tu consulta a alguien del equipo para que la resuelva con mayor precisión. En el transcurso del día nos estaremos comunicando con vos. Disculpá las molestias ocasionadas.\"\n\n## Tono y Estilo\nEspañol rioplatense, cálido y directo. Máximo 4 oraciones. Sin emojis ni tecnicismos innecesarios.\n\n",
+          "maxIterations": 5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -32,
+        -48
+      ],
+      "id": "ee11b35e-4f7b-4a38-b34e-301db5a3d649",
+      "name": "AI Agent",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        160
+      ],
+      "id": "aa54a086-6f8e-4a6d-9e5e-af763f5c11d4",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "tbwkFjleWWlCVumG",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Usá esta herramienta para consultar el estado de un pedido de Buk Nook cuando el cliente pregunta dónde está su compra, cuándo llega o si ya salió, y menciona un número de pedido. La entrada es solo el número de pedido (por ejemplo, 2345). Devuelve el producto y el estado del pedido. No sirve para precios ni políticas.",
+        "jsCode": "// Pedidos de prueba de Buk Nook.\nconst pedidos = {\n  '2345': 'Libro The Hobbit de Tolkien. Disponible para retiro en tienda: de lunes a viernes de 9:00 a 18:00 horas.',\n  '2348': 'Libros: Orgullo y Prejuicio, Ana de las Tejas Verdes y Hellbent. En preparación: Sale del depósito en 24 horas',\n  '2350': 'Libro: Alguien camina sobre tu tumba de Mariana Enriquez. Entregado el viernes 3 de octubre de 2026 a las 14 horas.'\n};\nconst numero = String(query).replace(/[^0-9]/g, '');\nreturn pedidos[numero] || 'No existe un pedido con el número ' + numero + '.';// Example: convert the incoming query to uppercase and return it\nreturn query.toUpperCase()\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        160
+      ],
+      "id": "9f583c34-1777-4f4e-8ba2-6cee7cfa4cb0",
+      "name": "lista_de_pedidos"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BP3DDCY4C",
+          "mode": "id"
+        },
+        "text": "=Hola!,\nLa siguiente tarea fue completada por el agente de Buk Nook.\nConsulta: {{ $('Chat con cliente').first().json.chatInput }} \nRespuesta: {{ $('AI Agent').first().json.output }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        336,
+        -48
+      ],
+      "id": "9d93d395-0359-46d8-9fe9-fc825fad6739",
+      "name": "Notificación en Slack",
+      "webhookId": "5c795a39-272e-48ec-9fa7-c8bc51e54611",
+      "credentials": {
+        "slackApi": {
+          "id": "LjJmG7fgQcbynDhK",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -256,
+        -48
+      ],
+      "id": "bd8f3684-ea1f-43cb-bb8d-3cd79086d9c9",
+      "name": "Chat con cliente",
+      "webhookId": "71aa0478-13ce-46d0-b129-11f37af555b9"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Notificación en Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lista_de_pedidos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat con cliente": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4d615688-0273-443f-8e5c-6532f0fb4775",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9dfa6421b88168c95e999c631360d521ed93936a64c2839bc4626cc397aac02b"
+  },
+  "nodeGroups": [],
+  "id": "JUN9gCUIz5cGjLyN",
+  "tags": []
+}
