@@ -1,0 +1,502 @@
+{
+  "name": "checkpoint4_mariana_papp",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "maxResults": 3,
+        "filters": {
+          "q": "Buk Nook",
+          "readStatus": "unread"
+        },
+        "options": {}
+      },
+      "id": "9716d1c9-523c-490b-b7f9-72cf75aa6586",
+      "name": "Nuevo Email",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -752,
+        288
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gentnvticy93bSBb",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2271afa3-cca1-5a2c-a87d-dec9b82e9c4e",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Auto-reply",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "83d208d6-f149-5dff-8b61-c910c99e4561",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Out of office",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "0f4bf4f2-c5e1-5d27-aee9-95776d45f9b8",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Undeliverable",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "c76d4d63-07f1-51ce-a9c9-1f885dd2835e",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Fuera de la oficina",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "872cac5e-52e8-5199-aa8e-2e12e24e1453",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Respuesta automática",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "0d9842a8-41ad-57d1-a616-0bb6fb3cd213",
+              "leftValue": "={{ $json.from.value[0].address }}",
+              "rightValue": "no-reply",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "5901cf10-778f-5c12-9352-8e8106934a3d",
+              "leftValue": "={{ $json.from.value[0].address }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "id": "7f12eb02-53a6-41e0-961f-46394fa0a3e0",
+      "name": "¿Es respuesta automática?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -560,
+        288
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "d7c97d38-f913-497d-ab74-5f6bc20afd43",
+      "name": "Detener proceso: no responder.",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cb76420f-2e19-581a-b96b-87b3c316f6db",
+              "name": "From",
+              "value": "={{ $json.from.value[0].address }}",
+              "type": "string"
+            },
+            {
+              "id": "807eeb6f-2780-59da-b18e-268a265a1c46",
+              "name": "Nombre",
+              "value": "={{ $json.from.value[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "d7cda24d-2e29-5b27-a4f0-c9efcc0a9538",
+              "name": "Subject",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "14d3acac-2e76-5abd-9e55-ec6e18f59220",
+              "name": "BodyText",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "a2580d62-5f3d-5be9-a4e9-d971d2fc0aa0",
+              "name": "ThreadId",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "34082156-2420-48b6-9f50-8c40aea68262",
+      "name": "Depuración de datos.",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -352,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "search",
+        "limit": 1,
+        "filterGroupsUi": {
+          "filterGroupsValues": [
+            {
+              "filtersUi": {
+                "filterValues": [
+                  {
+                    "propertyName": "email|string",
+                    "value": "={{ $json.From }}"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "id": "80c286d7-bee3-491a-ad1d-e5820831f41f",
+      "name": "Hubspot: Search de contacto.",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        -112,
+        400
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "hubspotOAuth2Api": {
+          "id": "KqxdVeuDhxHOtCnU",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "74ffe015-e22f-5b78-8158-f578ec1e5327",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "462776b8-cfaf-411d-be5c-8b3e1a461d12",
+      "name": "IF: ¿Existe contacto?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        96,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "email": "={{ $('Depuración de datos.').first().json.From }}",
+        "additionalFields": {
+          "firstName": "={{ $('Depuración de datos.').first().json.Nombre }}"
+        },
+        "options": {}
+      },
+      "id": "95237feb-4034-4d2e-bb35-ecad8c023f44",
+      "name": "Hubspot: Crear contacto.",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        496
+      ],
+      "credentials": {
+        "hubspotOAuth2Api": {
+          "id": "KqxdVeuDhxHOtCnU",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        608,
+        608
+      ],
+      "id": "d2c1141d-4928-4894-a1e9-fc8d76bf92fd",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "tbwkFjleWWlCVumG",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Preparás borradores de respuesta para la casilla de soporte de Buk Nook, una librería localizada en Ciudad Autónoma de Buenos Aires. Alguien del equipo simepre revisa cada borrador antes de enviarlo.\n\nUsá SOLO estos datos de la tienda:\n- **Horarios:** Lunes a viernes de 9:00 a 18:00 horas, sábados de 9:00 a 13:00 horas.\n- **Precio de curso de escritura creativa:** 50.000,00 pesos argentinos. Inicio: 10 de diciembre de 2026. Cupo de 20 personas.\n- **Precio contribución para club de lectura:** 10.000,00 incluye una bebida y un pedazo de torta. Las reuniones se hacen cada segundo sábado del mes, para más información suscribirse al Newsletter.\n- **Envíos:** A CABA y GBA llegan en 24 y 72 hs hábiles. Envío gratis (free delivery) con compras mayores a 80.000,00 pesos argentinos. Interior del país de 5 a 7 días hábiles, con costo según destino.\n- **Cambios y devoluciones:** El cliente podrá solicitar la devolución dentro de los 10 días corridos posteriores a la recepción del producto, conforme a la Ley de Defensa del Consumidor en Argentina. Pasado ese plazo, no se aceptarán devoluciones salvo por tratarse de un libro defectuoso. El producto debe estar en perfecto estado, sin marcas, sin subrayados ni escritos, sin ningún tipo de envoltura extra, sin daños en tapas o páginas y con su empaque original.\n- **Pagos:** Tarjeta de crédito Visa, Mastercard o American Express.\n\nReglas:\n- Español rioplatense, cálido y directo. Saludá por el nombre si lo tenés. Máximo 5 oraciones.\n- Si el cliente necesita algo que no está en estos datos (presupuesto, estado de un pedido, un reclamo), no lo inventes: decí que alquien del equipo lo revisa y le responde en el transcurso del día.\n- Escribí solo el cuerpo del correo, sin asunto. Firmá \"Equipo de Buk Nook\". Sin emojis.\n\nNombre del cliente: {{ $('Depuración de datos.').first().json.Nombre }}\nAsunto: {{ $('Depuración de datos.').first().json.Subject }}\nCorreo del cliente:\n###\n{{ $('Depuración de datos.').first().json.BodyText }}\n###",
+        "batching": {}
+      },
+      "id": "c1285f05-7522-4336-8b21-36fcdfe8ea2c",
+      "name": "Redactor de respuestas.",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        608,
+        384
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: {{ $('Depuración de datos.').first().json.Subject.replace(/^re:\\s*/i, '') }}",
+        "message": "={{ $('Redactor de respuestas.').first().json.text }}",
+        "options": {
+          "threadId": "={{ $('Depuración de datos.').first().json.ThreadId }}",
+          "sendTo": "={{ $('Depuración de datos.').first().json.From }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        384
+      ],
+      "id": "10235183-f041-41c7-a01e-7a3a20481b94",
+      "name": "Gmail: Crear draft.",
+      "webhookId": "607a44c2-01a2-4f4c-982e-4d832394628d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gentnvticy93bSBb",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BP3DDCY4C",
+          "mode": "id"
+        },
+        "text": "=Se ha creado un nuevo correo en la casilla de soporte Cliente: {{ $('Depuración de datos.').first().json.Nombre }} ({{ $('Depuración de datos.').first().json.From }}) Asunto: {{ $('Depuración de datos.').first().json.Subject }} HubSpot: {{ $('Hubspot: Crear contacto.').isExecuted ? 'contacto nuevo' : 'ya era contacto' }} \nBorrador listo para revisar en Gmail.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1136,
+        384
+      ],
+      "id": "450701b9-9e89-4ce4-abe6-058b299f3216",
+      "name": "Slack: notificación de nuevo Gmail draft.",
+      "webhookId": "11d8ea7e-8270-4216-b705-95665b3af4af",
+      "credentials": {
+        "slackApi": {
+          "id": "LjJmG7fgQcbynDhK",
+          "name": "Slack account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Nuevo Email": {
+      "main": [
+        [
+          {
+            "node": "¿Es respuesta automática?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es respuesta automática?": {
+      "main": [
+        [
+          {
+            "node": "Detener proceso: no responder.",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Depuración de datos.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Depuración de datos.": {
+      "main": [
+        [
+          {
+            "node": "Hubspot: Search de contacto.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hubspot: Search de contacto.": {
+      "main": [
+        [
+          {
+            "node": "IF: ¿Existe contacto?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: ¿Existe contacto?": {
+      "main": [
+        [
+          {
+            "node": "Redactor de respuestas.",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hubspot: Crear contacto.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hubspot: Crear contacto.": {
+      "main": [
+        [
+          {
+            "node": "Redactor de respuestas.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Redactor de respuestas.",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redactor de respuestas.": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Crear draft.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: Crear draft.": {
+      "main": [
+        [
+          {
+            "node": "Slack: notificación de nuevo Gmail draft.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c91c7ff9-872f-4dd7-a4e3-004d08729759",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9dfa6421b88168c95e999c631360d521ed93936a64c2839bc4626cc397aac02b"
+  },
+  "nodeGroups": [],
+  "id": "tU8vgJrsHw7FnIHA",
+  "tags": []
+}
